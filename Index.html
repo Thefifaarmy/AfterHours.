@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>After Hours — Long Distance Edition</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-85vh) scale(1.2);
+        opacity: 0;
+      }
+    }
+    .heart-particle {
+      position: absolute;
+      bottom: 0;
+      pointer-events: none;
+      color: rgba(244, 63, 94, 0.2);
+      animation: floatUp 6s linear infinite;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 99px;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card-dark {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    /* Safe Area adjustments for modern iPhones */
+    .safe-pb {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .safe-pt {
+      padding-top: env(safe-area-inset-top);
+    }
+  </style>
+</head>
+<body class="h-[100dvh] w-screen relative flex flex-col justify-between overflow-hidden select-none transition-colors duration-500 bg-slate-950 text-white safe-pt safe-pb">
+
+  <!-- BACKGROUND GRADIENT BLLOBS -->
+  <div class="absolute inset-0 pointer-events-none overflow-hidden z-0" id="ambient-bg">
+    <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-gradient-to-br from-pink-600/20 to-purple-600/20 blur-3xl animate-pulse"></div>
+    <div class="absolute top-1/2 -right-40 w-96 h-96 rounded-full bg-gradient-to-br from-purple-600/20 to-rose-600/20 blur-3xl animate-pulse" style="animation-duration: 10s;"></div>
+    <div class="absolute -bottom-40 left-10 w-96 h-96 rounded-full bg-gradient-to-br from-indigo-600/20 to-pink-600/20 blur-3xl animate-pulse" style="animation-duration: 7s;"></div>
+    <div id="heart-container" class="absolute inset-0 overflow-hidden"></div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 transition-all duration-300 transform translate-y-[-100px] opacity-0 pointer-events-none">
+    <i data-lucide="heart" class="w-5 h-5 text-rose-500 fill-rose-500 animate-pulse"></i>
+    <span id="toast-message" class="text-sm font-semibold text-white tracking-wide">Toast text</span>
+  </div>
+
+  <!-- HEADER BAR (Fixed Height) -->
+  <header class="h-16 flex-shrink-0 relative z-10 px-6 flex items-center justify-between backdrop-blur-sm border-b border-white/5">
+    <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('dashboard')">
+      <div class="bg-gradient-to-tr from-pink-500 to-rose-500 p-2 rounded-xl shadow-lg">
+        <i data-lucide="heart" class="w-5 h-5 text-white fill-white"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold tracking-wider bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 bg-clip-text text-transparent leading-none">
+          AFTER HOURS
+        </h1>
+        <span class="text-[9px] uppercase font-bold tracking-widest opacity-60 block mt-0.5" style="line-height: 1;">Long Distance</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1.5" id="header-controls">
+      <button onclick="toggleTheme()" class="p-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all" aria-label="Toggle theme">
+        <i id="theme-icon" data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+      </button>
+      <button onclick="navigateTo('settings')" class="p-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all" aria-label="Settings">
+        <i data-lucide="settings" class="w-4 h-4 opacity-80"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CANVAS CONTENT CONTAINER (Strictly Constrained) -->
+  <main class="flex-grow overflow-hidden relative z-10 px-4 py-3 max-w-lg mx-auto w-full flex flex-col justify-center">
+    
+    <!-- ONBOARDING SCREEN -->
+    <div id="screen-onboarding" class="screen hidden w-full max-h-full overflow-y-auto custom-scrollbar glass-card rounded-3xl p-6 shadow-2xl relative">
+      <div class="text-center mb-5">
+        <span class="text-pink-500 font-semibold tracking-widest uppercase text-xs">Premium Digital Couples Deck</span>
+        <h2 class="text-2xl font-extrabold mt-1 tracking-tight">Set Your Setup</h2>
+        <p class="text-xs opacity-70 mt-1">Enter your names and relationship status to unlock personalized cards built for screen share and phone calls.</p>
+      </div>
+
+      <div class="space-y-3.5">
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 opacity-70">Your Name</label>
+          <input type="text" id="input-p1" placeholder="e.g. Dylan" class="w-full bg-white/5 focus:bg-white/10 border border-white/10 focus:border-pink-500/50 rounded-xl px-4 py-2.5 text-sm outline-none transition-all text-white placeholder:opacity-40">
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 opacity-70">Partner's Name</label>
+          <input type="text" id="input-p2" placeholder="e.g. Chloe" class="w-full bg-white/5 focus:bg-white/10 border border-white/10 focus:border-pink-500/50 rounded-xl px-4 py-2.5 text-sm outline-none transition-all text-white placeholder:opacity-40">
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider mb-1.5 opacity-70">Relationship Phase</label>
+          <div class="grid grid-cols-2 gap-2" id="relationship-status-options">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 opacity-70">Anniversary Date (Optional)</label>
+          <input type="date" id="input-anniversary" class="w-full bg-white/5 focus:bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none transition-all text-white">
+        </div>
+
+        <button onclick="submitOnboarding()" id="btn-start" class="w-full py-3.5 rounded-xl font-bold text-white transition-all shadow-xl tracking-wider uppercase text-xs mt-2 bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:brightness-110 active:scale-95">
+          Start Premium Experience
+        </button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD SCREEN -->
+    <div id="screen-dashboard" class="screen hidden h-full flex flex-col overflow-y-auto custom-scrollbar space-y-4 pr-1 pb-4">
+      <!-- Active Profile Bar -->
+      <div class="bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-white/10 rounded-2xl p-3.5 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="bg-white/10 p-2 rounded-full">
+            <i data-lucide="phone-call" class="w-4 h-4 text-pink-400"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-xs tracking-wide" id="profile-names">Dylan & Chloe</h3>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span id="profile-status" class="text-[9px] px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 font-extrabold uppercase tracking-widest">Dating</span>
+              <span id="profile-anniversary" class="text-[9px] opacity-60 flex items-center gap-1"></span>
+            </div>
+          </div>
+        </div>
+        <button onclick="editProfile()" class="text-[10px] bg-white/5 hover:bg-white/10 px-2.5 py-1 rounded-lg border border-white/10 font-semibold transition-all">Edit</button>
+      </div>
+
+      <!-- Quick Actions Grid -->
+      <div class="grid grid-cols-2 gap-3 flex-shrink-0">
+        <button onclick="startRoulette()" class="bg-gradient-to-r from-pink-600 to-purple-600 p-3.5 rounded-2xl text-left border border-white/10 relative overflow-hidden group shadow-lg active:scale-95 transition-all">
+          <div class="absolute right-1 bottom-1 opacity-15 transform group-hover:scale-110 transition-transform">
+            <i data-lucide="shuffle" class="w-12 h-16 text-white"></i>
+          </div>
+          <i data-lucide="shuffle" class="w-4 h-4 mb-2 text-white"></i>
+          <h4 class="font-extrabold text-xs tracking-wide text-white">Question Roulette</h4>
+          <p class="text-[10px] text-white/70 mt-0.5 leading-tight">Let destiny choose a call-friendly deck.</p>
+        </button>
+
+        <button onclick="navigateTo('favorites')" class="bg-white/5 hover:bg-white/10 p-3.5 rounded-2xl text-left border border-white/10 relative overflow-hidden group shadow-lg active:scale-95 transition-all">
+          <div class="absolute right-1 bottom-1 opacity-10 transform group-hover:scale-110 transition-transform">
+            <i data-lucide="star" class="w-12 h-16 text-white"></i>
+          </div>
+          <i data-lucide="star" class="w-4 h-4 mb-2 text-rose-500 fill-rose-500"></i>
+          <h4 class="font-extrabold text-xs tracking-wide">Saved Cards</h4>
+          <p class="text-[10px] opacity-70 mt-0.5 leading-tight" id="saved-cards-count">0 prompts bookmarked.</p>
+        </button>
+      </div>
+
+      <!-- Categories Container -->
+      <div class="flex-grow">
+        <div class="flex items-center justify-between mb-2 px-1">
+          <h3 class="text-[11px] font-bold uppercase tracking-widest opacity-80">Select Call Deck</h3>
+          <span id="categories-count-indicator" class="text-[10px] opacity-50 font-semibold">18 Categories</span>
+        </div>
+        <div class="space-y-2.5" id="categories-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- GAMEPLAY CARD SCREEN -->
+    <div id="screen-game" class="screen hidden h-full flex flex-col justify-between overflow-hidden py-1">
+      <!-- Game Top Info Bar -->
+      <div class="flex items-center justify-between flex-shrink-0 mb-2">
+        <button onclick="navigateTo('dashboard')" class="flex items-center gap-1.5 text-xs font-semibold opacity-70 hover:opacity-100 transition-all">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i> Decks
+        </button>
+        <div class="flex items-center gap-1.5 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+          <i id="game-cat-icon" data-lucide="heart-handshake" class="w-3 h-3 text-pink-400"></i>
+          <span id="game-cat-title" class="text-[9px] font-extrabold uppercase tracking-wider">Relationship</span>
+        </div>
+        <div id="game-card-counter" class="text-[11px] opacity-50 font-bold">Card #1</div>
+      </div>
+
+      <!-- Main Deck Card -->
+      <div id="game-card" class="relative flex-grow rounded-3xl border flex flex-col justify-between p-6 my-2 shadow-2xl transition-all duration-700 overflow-hidden">
+        <!-- Target Banner + Star icon -->
+        <div class="flex justify-between items-start flex-shrink-0">
+          <div id="card-target-label" class="bg-pink-500/20 text-pink-300 text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full border border-pink-500/30">
+            Question for Both
+          </div>
+          <button onclick="toggleCurrentFavorite()" class="p-1.5 rounded-full hover:bg-white/10 transition-all" aria-label="Add to favourites">
+            <i id="card-fav-star" data-lucide="star" class="w-5 h-5 transition-all opacity-40 hover:opacity-100"></i>
+          </button>
+        </div>
+
+        <!-- Central Prompt Text -->
+        <div class="flex-grow flex items-center justify-center overflow-y-auto py-4 px-1 custom-scrollbar">
+          <p id="card-question-text" class="font-medium tracking-tight leading-relaxed text-2xl md:text-3xl text-center w-full">
+            "Prompt loading..."
+          </p>
+        </div>
+
+        <!-- Call reminder -->
+        <div class="text-center flex-shrink-0 pt-2 border-t border-white/5">
+          <span class="text-[9px] uppercase font-bold tracking-widest opacity-40">Discuss Verbally Over the Call</span>
+        </div>
+      </div>
+
+      <!-- Navigation & Action Buttons -->
+      <div class="flex flex-col gap-2 flex-shrink-0 mt-2">
+        <div class="grid grid-cols-3 gap-2">
+          <button id="btn-prev-card" onclick="prevQuestion()" class="py-3.5 rounded-xl flex items-center justify-center border bg-white/5 border-white/10 active:scale-95 transition-all">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <button onclick="nextQuestion()" class="col-span-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-1.5 shadow-xl text-sm active:scale-95 transition-all">
+            Next Card <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between gap-2">
+          <button onclick="shuffleQuestion()" class="flex-1 bg-white/5 hover:bg-white/10 text-[11px] font-bold py-3 rounded-lg border border-white/10 flex items-center justify-center gap-1 transition-all">
+            <i data-lucide="shuffle" class="w-3 h-3"></i> Skip / Shuffle
+          </button>
+          <button id="btn-spin-again" onclick="startRoulette()" class="hidden flex-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-[11px] font-bold py-3 rounded-lg border border-purple-500/25 flex items-center justify-center gap-1 transition-all">
+            <i data-lucide="shuffle" class="w-3 h-3"></i> Spin Again
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAVORITES SCREEN -->
+    <div id="screen-favorites" class="screen hidden h-full flex flex-col justify-between overflow-hidden">
+      <div class="flex items-center justify-between mb-2 flex-shrink-0">
+        <button onclick="navigateTo('dashboard')" class="flex items-center gap-1 text-xs font-semibold opacity-70 hover:opacity-100 transition-all">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i> Home
+        </button>
+        <h3 id="favs-title" class="font-extrabold text-sm uppercase tracking-widest">Saved Deck (0)</h3>
+      </div>
+
+      <!-- Search Filter -->
+      <div class="relative flex-shrink-0 mb-3">
+        <i data-lucide="search" class="absolute left-3.5 top-3 w-4 h-4 opacity-40"></i>
+        <input type="text" id="favs-search-input" oninput="filterFavorites(this.value)" placeholder="Search through saved prompts..." class="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs outline-none focus:border-pink-500/50 transition-all text-white">
+      </div>
+
+      <!-- Scrollable list of favorites -->
+      <div id="favorites-list" class="flex-grow space-y-2.5 overflow-y-auto pr-1 custom-scrollbar pb-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- SETTINGS SCREEN -->
+    <div id="screen-settings" class="screen hidden h-full flex flex-col overflow-y-auto custom-scrollbar space-y-4 pb-6">
+      <div class="flex items-center justify-between flex-shrink-0">
+        <button onclick="navigateTo('dashboard')" class="flex items-center gap-1 text-xs font-semibold opacity-70 hover:opacity-100 transition-all">
+          <i data-lucide="chevron-left" class="w-4 h-4"></i> Home
+        </button>
+        <h3 class="font-extrabold text-sm uppercase tracking-widest">Settings</h3>
+      </div>
+
+      <!-- Configuration Card -->
+      <div class="bg-white/5 border border-white/15 rounded-2xl p-5 space-y-4">
+        <!-- Card Font Size selection -->
+        <div>
+          <label class="block text-[10px] font-bold uppercase tracking-wider mb-2 opacity-70">Card Font Size</label>
+          <div class="grid grid-cols-4 gap-1 bg-white/5 p-1 rounded-xl">
+            <button onclick="setFontSize('sm')" id="font-btn-sm" class="py-1 text-xs font-bold rounded-lg uppercase tracking-wider transition-all">SM</button>
+            <button onclick="setFontSize('md')" id="font-btn-md" class="py-1 text-xs font-bold rounded-lg uppercase tracking-wider transition-all">MD</button>
+            <button onclick="setFontSize('lg')" id="font-btn-lg" class="py-1 text-xs font-bold rounded-lg uppercase tracking-wider transition-all">LG</button>
+            <button onclick="setFontSize('xl')" id="font-btn-xl" class="py-1 text-xs font-bold rounded-lg uppercase tracking-wider transition-all">XL</button>
+          </div>
+        </div>
+
+        <!-- Haptics Toggle -->
+        <div class="flex items-center justify-between py-1.5 border-b border-white/5">
+          <div>
+            <h4 class="text-xs font-semibold">Vibration Feedback</h4>
+            <p class="text-[9px] opacity-60">Subtle haptic sensations on actions</p>
+          </div>
+          <button onclick="toggleSetting('haptics')" id="toggle-haptics" class="w-10 h-5 rounded-full p-0.5 transition-all bg-white/10">
+            <div class="w-4 h-4 rounded-full bg-white transition-all transform translate-x-0"></div>
+          </button>
+        </div>
+
+        <!-- Animations Toggle -->
+        <div class="flex items-center justify-between py-1.5 border-b border-white/5">
+          <div>
+            <h4 class="text-xs font-semibold">Atmospheric Animations</h4>
+            <p class="text-[9px] opacity-60">Floating romantic hearts & gradients</p>
+          </div>
+          <button onclick="toggleSetting('animations')" id="toggle-animations" class="w-10 h-5 rounded-full p-0.5 transition-all bg-white/10">
+            <div class="w-4 h-4 rounded-full bg-white transition-all transform translate-x-0"></div>
+          </button>
+        </div>
+
+        <!-- Midnight/Dark Lock Mode -->
+        <div class="flex items-center justify-between py-1.5">
+          <div>
+            <h4 class="text-xs font-semibold">Midnight Theme Only</h4>
+            <p class="text-[9px] opacity-60">Locks layout to deep dark tones</p>
+          </div>
+          <button onclick="toggleSetting('darkMode')" id="toggle-darkMode" class="w-10 h-5 rounded-full p-0.5 transition-all bg-white/10">
+            <div class="w-4 h-4 rounded-full bg-white transition-all transform translate-x-0"></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Dangerous Resets -->
+      <div class="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-center">
+        <h4 class="text-xs font-bold text-red-400 uppercase tracking-wide">Danger Area</h4>
+        <p class="text-[10px] opacity-70 mt-1 mb-3">Resetting will permanently erase your data and saved cards.</p>
+        <button onclick="confirmResetAll()" class="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-[10px] uppercase tracking-widest transition-all">
+          Erase All App Data
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- APP FOOTER -->
+  <footer class="h-10 flex-shrink-0 flex items-center justify-center border-t border-white/5">
+    <span class="text-[9px] tracking-widest opacity-50 uppercase font-bold">
+      © <span id="current-year">2026</span> After Hours • Long Distance Decks
+    </span>
+  </footer>
+
+  <!-- DYNAMIC CORE ENGINE SCRIPTS -->
+  <script>
+    // ==========================================
+    // SEED DATABASE & TEMPLATE VARIABLES
+    // ==========================================
+    const APP_ID = 'after-hours-cards';
+
+    const CATEGORIES = [
+      { id: 'relationship', title: 'Relationship', icon: 'heart-handshake', desc: 'Strengthen your bond and dive into your unique connection.', color: 'from-pink-500 to-rose-500' },
+      { id: 'pillow_talk', title: 'Pillow Talk', icon: 'message-circle', desc: 'Cozy, romantic conversation starters perfect for winding down a call.', color: 'from-indigo-900 via-purple-900 to-slate-900', isMidnight: true },
+      { id: 'facetime_sensory', title: 'Late Night FaceTime', icon: 'eye', desc: 'Visual connection games, audio syncs, and screen-to-screen play.', color: 'from-blue-600 via-purple-800 to-indigo-950', isMidnight: true },
+      { id: 'phone_dares', title: 'Phone Dares (18+)', icon: 'zap', desc: 'Teasing microphone dares, low-whisper challenges, and screen tasks.', color: 'from-red-600 via-rose-900 to-stone-950', isAdult: true },
+      { id: 'vocal_desires', title: 'Vocal Desires (18+)', icon: 'flame', desc: 'Tease each other with what you want to do the next time you see each other.', color: 'from-red-500 via-orange-600 to-stone-900', isAdult: true },
+      { id: 'adult_photo', title: '18+ Photo Challenge', icon: 'camera', desc: 'Take and send steamy close-ups or share camera roll secrets.', color: 'from-rose-700 via-red-800 to-stone-900', isAdult: true },
+      { id: 'would_you_let', title: 'Would You Let...?', icon: 'shield-check', desc: 'Hilarious boundaries, trust tests, and silly phone permissions.', color: 'from-cyan-500 to-blue-600' },
+      { id: 'reaction_scenario', title: 'If They Did This...', icon: 'alert-triangle', desc: 'Hypothetical situations to reveal your honest reactions.', color: 'from-amber-500 to-red-500' },
+      { id: 'whats_something', title: "What's Something About...?", icon: 'eye', desc: 'Deep dive observations about habits, quirks, and traits.', color: 'from-purple-500 to-indigo-600' },
+      { id: 'photo_challenge', title: 'Photo Challenge', icon: 'camera', desc: 'Unlock memories. Search your camera roll to share on screen.', color: 'from-emerald-500 to-teal-600' },
+      { id: 'deep', title: 'Deep Thoughts', icon: 'sparkles', desc: 'Vulnerable questions to explore thoughts, fears, and dreams.', color: 'from-purple-600 to-indigo-600' },
+      { id: 'flirty', title: 'Flirty & Warm', icon: 'heart', desc: 'Cheeky, affectionate prompts to spark beautiful chemistry over the phone.', color: 'from-rose-500 to-pink-600' },
+      { id: 'future', title: 'Future & Ambitions', icon: 'milestone', desc: 'Align your long-term goals, financial dreams, and family visions.', color: 'from-emerald-500 to-teal-600' },
+      { id: 'nostalgia', title: 'Nostalgia & School', icon: 'smile', desc: 'Childhood memories, old school crushes, and growing up.', color: 'from-amber-500 to-orange-600' },
+      { id: 'travel', title: 'Travel & Adventure', icon: 'compass', desc: 'Dream roadtrips, wilderness getaways, and bucket list spots.', color: 'from-blue-500 to-indigo-600' },
+      { id: 'unpopular', title: 'Unpopular Opinions', icon: 'help-circle', desc: 'Playful arguments, food wars, and hilarious hot takes.', color: 'from-violet-500 to-fuchsia-600' },
+      { id: 'would_you_rather', title: 'Would You Rather', icon: 'layers', desc: 'Tough dilemmas and trade-offs tailored specifically for couples.', color: 'from-purple-500 to-pink-500' },
+      { id: 'how_well', title: 'How Well Do You Know Me?', icon: 'users', desc: 'Test your understanding of each other’s habits and quirks.', color: 'from-indigo-500 to-purple-500' }
+    ];
+
+    const ENGINE_DATABASE = {
+      relationship: {
+        static: [
+          { question: "What is something you hope never changes about our relationship?", target: "both" },
+          { question: "If we had a theme song that played whenever we walked into a room, what would it be?", target: "both" },
+          { question: "What was the exact moment you realized you had fallen for me?", target: "both" },
+          { question: "What is a small, quiet moment we shared that you think about often?", target: "both" },
+          { question: "What is one thing about how we handle disagreements that makes you feel safe?", target: "both" },
+          { question: "How has our dynamic evolved since we first started talking?", target: "both" },
+          { question: "What represents the most secure aspect of our relationship to you?", target: "both" },
+          { question: "If you could define our bond in three words, what would they be?", target: "both" },
+          { question: "What is a habit of mine that you secretly find adorable or comforting?", target: "both" },
+          { question: "What is your absolute favorite inside joke that we share?", target: "both" },
+          { question: "How do you think we balance each other out best?", target: "both" },
+          { question: "What is the most thoughtful thing I have ever done for you?", target: "both" },
+          { question: "When we are apart, what is the little thing you miss about me the most?", target: "both" },
+          { question: "Which of our shared values do you think is our strongest foundation?", target: "both" },
+          { question: "What is the biggest lesson we have learned together as a couple?", target: "both" },
+          { question: "What song instantly makes you think of us when it plays?", target: "both" },
+          { question: "What is something we do together that always boosts your mood?", target: "both" },
+          { question: "How do you feel our communication has improved since we began?", target: "both" },
+          { question: "What is the most romantic conversation we have ever had?", target: "both" },
+          { question: "If our connection was a visual aesthetic, what would it look like?", target: "both" },
+          { question: "What is one promise you want us to make to each other today?", target: "both" },
+          { question: "What is a topic we talked about recently that made you feel closer to me?", target: "both" },
+          { question: "In what way do you feel most safe being yourself around me?", target: "both" },
+          { question: "What is one thing you have learned about yourself through loving me?", target: "both" },
+          { question: "Which of our past dates do you catch yourself daydreaming about during the week?", target: "both" },
+          { question: "What is a small goal you want us to set for our relationship next month?", target: "both" },
+          { question: "If you could capture our relationship in a single photograph, what would be in it?", target: "both" },
+          { question: "What is a personality trait of mine that you think matches yours perfectly?", target: "both" },
+          { question: "When we are on calls like this, does it make the physical distance feel shorter to you?", target: "both" },
+          { question: "What are you most proud of regarding how we have handled being long-distance?", target: "both" },
+          { question: "What is the best piece of relationship advice you think we actually live by?", target: "both" },
+          { question: "What is a hobby or routine you want to start together once we are in the same city?", target: "both" }
+        ],
+        templates: [
+          "How would you describe the difference between your first impression of {other} and how you see {other} today?",
+          "If you had to choose one {location_type} to spend a quiet month with {other} with no phones, where would you go?",
+          "What is your absolute favorite memory of {other} looking completely happy or carefree?",
+          "Which of {other}'s core personal values do you respect the most?",
+          "If you could relive our {anniversary_event} from start to finish, would you change anything?",
+          "What is {other}'s biggest personal strength when handling difficult situations?",
+          "How does {other} make you feel supported during stressful weeks?",
+          "If you could surprise {other} with any {gift_type} tomorrow, what would you choose and why?",
+          "What is one quirk about {other}'s daily routine that you have slowly grown to absolutely love?"
+        ]
+      },
+      pillow_talk: {
+        static: [
+          { question: "If we were sharing a bed tonight instead of being on this call, what position would we be falling asleep in?", target: "both" },
+          { question: "What is the most comforting thing about hearing my voice late at night?", target: "both" },
+          { question: "Describe a quiet, warm moment when you felt closer to me than ever before, despite the distance.", target: "both" },
+          { question: "What is a soft secret you only think about when you are drifting off to sleep?", target: "both" },
+          { question: "What is your favorite late-night topic to discuss when neither of us wants to hang up?", target: "both" },
+          { question: "What does my presence on the other side of this phone call do to your anxiety?", target: "both" },
+          { question: "If we could dream the exact same dream tonight, what would you want us to do in it?", target: "both" },
+          { question: "How often do you hug your pillow and pretend it's me when we're on a late-night call?", target: "both" },
+          { question: "What is the sweetest thing I could say to you right now as you close your eyes?", target: "both" },
+          { question: "Do you prefer falling asleep to the sound of my breathing or keeping the conversation going?", target: "both" },
+          { question: "What is a question you've been wanting to ask me all day but waited until midnight for?", target: "both" },
+          { question: "If I was next to you right now, would you want me to stroke your hair or hold your hand?", target: "both" },
+          { question: "What is your favorite childhood bedtime memory or comfort object?", target: "both" },
+          { question: "Describe the perfect, coziest rainy night with me in detail.", target: "both" },
+          { question: "What are three small details about my face on screen that you find incredibly soothing?", target: "both" },
+          { question: "If we woke up early together tomorrow, what is the first thing you'd want us to say to each other?", target: "both" },
+          { question: "What is a quiet, late-night thought you had about me recently that you haven't shared?", target: "both" },
+          { question: "How do you feel when you wake up to a sweet good morning text from me?", target: "both" },
+          { question: "What's the most peaceful place you have ever visited, and can you imagine us there together?", target: "both" },
+          { question: "If we had to spend a whole rainy Sunday in bed, would we talk, watch movies, or just sleep?", target: "both" },
+          { question: "What is the most relaxing or therapeutic thing about hearing me say your name?", target: "both" },
+          { question: "What is a soft, comforting childhood memory you haven't told me about yet?", target: "both" },
+          { question: "Do you ever get a sudden wave of warmth when you think about me out of nowhere during the day?", target: "both" },
+          { question: "What is the coziest outfit you own that you wish I could borrow?", target: "both" },
+          { question: "If we could turn off all the lights and just talk in the pitch black right now, what would you want to whisper?", target: "both" },
+          { question: "What's a song that feels like a warm hug to you when you are feeling low?", target: "both" }
+        ],
+        templates: [
+          "Whisper {count} things you love about {other}'s presence when we are finally together in person.",
+          "What is a soft, comforting thought about {other} that you secretly carry with you during your busy days?",
+          "If you had to describe our current phone call vibe using only {whisper_adjective} words, what would they be?",
+          "What is a cozy, simple {date_vibe} activity you wish {other} was here to do with you tonight?",
+          "How has your perspective on {other}'s emotional depth grown since we started having these late night talks?"
+        ]
+      },
+      facetime_sensory: {
+        static: [
+          { question: "Let's both close our eyes right now. Count to 10 out loud, trying to stay in perfect unison without seeing each other's faces.", target: "both" },
+          { question: "Trace your finger gently on your phone screen exactly where my eyes are. Tell me what you're thinking about right now.", target: "both" },
+          { question: "Look directly into your camera without blinking, speaking, or smiling for 20 seconds. First one to break has to answer a deep question.", target: "both" },
+          { question: "Close your eyes and try to guess what object I am holding up to the camera based solely on my descriptive verbal clues.", target: "both" },
+          { question: "Mimic my facial expressions exactly as I change them for the next 15 seconds.", target: "both" },
+          { question: "Turn your camera off for 15 seconds. Use only your microphone to make three cozy sounds (e.g. whispering, sighing) and let me guess what they are.", target: "both" },
+          { question: "Put your finger on your camera lens to block the light. Let's see if we can tap our screens to create a rhythmic beat together.", target: "both" },
+          { question: "Describe the texture of my hair using only your memory and highly vivid sensory words.", target: "both" },
+          { question: "Hum a single note and let's see how long we can hold it in perfect harmony over the phone.", target: "both" },
+          { question: "Move your camera slowly around your room. Point out one object that has a unique texture and describe how it feels in your hands.", target: "both" },
+          { question: "Look closely at my eyes on the screen. What is the exact primary color and ring pattern you notice?", target: "both" },
+          { question: "Whisper a single word as softly as possible. Keep turning down your voice until I can barely hear it.", target: "both" },
+          { question: "Put your phone screen close to your face. Let's pretend to press our foreheads together against the glass.", target: "both" },
+          { question: "Let's take a deep breath in together. Hold it for 4 seconds, and exhale in perfect unison.", target: "both" },
+          { question: "Stare deeply at my neck and jaw on screen. Describe exactly how you imagine tracing them with your lips.", target: "both" },
+          { question: "Mute your phone for 10 seconds. Look at me and use only your facial expressions and eyes to tell me how much you desire me.", target: "both" },
+          { question: "Slowly move your camera up and down your body so I can see what you're wearing right now. Describe the textures of the fabric.", target: "both" },
+          { question: "Whisper a single, suggestive sound directly into your microphone, keeping your mouth as close to it as possible.", target: "both" },
+          { question: "Close your eyes and listen to my voice. Tell me if I sound excited, relaxed, or seductive to you right now.", target: "both" },
+          { question: "Trace your screen where my collarbone is. Close your eyes and tell me how it feels to imagine kissing it.", target: "both" },
+          { question: "Put your camera in a position where I can see your hands. Slowly run your fingers over your own lips while looking at me.", target: "both" }
+        ],
+        templates: [
+          "Keep your eyes closed for 30 seconds while {other} describes an incredibly detailed {sensual_focus_ld} in a slow, calm voice.",
+          "Close your eyes and listen to the tone of {other}'s voice as they whisper a {whisper_adjective} secret into the microphone.",
+          "Trace your finger along the screen where {other}'s lips are and describe exactly what you want to do the moment we see each other next.",
+          "Close your eyes while {other} slowly whispers {count} sensory details of how they plan to touch your {body_part_spicy} next time."
+        ]
+      },
+      phone_dares: {
+        static: [
+          { question: "Bring your phone incredibly close to your lips and whisper your absolute favorite bedroom memory of us.", target: "both" },
+          { question: "You have 30 seconds to find the most attractive close-up selfie of me on your phone, screen-share it, and explain why you love it.", target: "both" },
+          { question: "Mute your microphone for 15 seconds, look at me on camera, and silently mouth a highly suggestive sentence. I have to guess what it is.", target: "both" },
+          { question: "Put your phone right next to your chest. Let me listen to your heartbeat in complete silence for 15 seconds.", target: "both" },
+          { question: "Send me a voice note right now saying the craziest, cheekiest thought you have in your head in a French or Italian accent.", target: "both" },
+          { question: "Do your best, most dramatic reading of the last text message I sent you.", target: "both" },
+          { question: "Tell me a secret about yourself that you have never told another living soul.", target: "both" },
+          { question: "Post a completely silly selfie of your face right now to our private chat. No retakes allowed!", target: "both" },
+          { question: "Give me an intense stare of desire on camera for 10 full seconds without laughing or breaking character.", target: "both" },
+          { question: "Hum your favorite romantic song and make me guess what it is in under 15 seconds.", target: "both" },
+          { question: "Send me a text message with only emojis to describe your plans for our next physical date.", target: "both" },
+          { question: "Whisper three words in my ear that would instantly make me blush if we were in public.", target: "both" },
+          { question: "Find a random object near you and make up a highly persuasive 30-second sales pitch about why I need to buy it.", target: "both" },
+          { question: "Take a deep breath and tell me your wildest bedroom fantasy in a completely monotone, professional voice.", target: "both" },
+          { question: "Look into the camera and give me your most seductive wink, followed immediately by your most ridiculous goofy face.", target: "both" },
+          { question: "Unmute your mic, put it right to your mouth, and make a soft, breathless sound that indicates you want me.", target: "both" },
+          { question: "Show me your browser search history or your most recent search bar history right now via screen share. No clearing!", target: "both" },
+          { question: "Speak in a deep, commanding tone for the next minute. You must tell me exactly what you want me to do to you next time.", target: "both" },
+          { question: "Find any piece of clothing near you, put it on your head, and continue our call like nothing is wrong for the next turn.", target: "both" },
+          { question: "Stand up, step back from the camera, and do a slow, playful 360-degree turn so I can admire your entire body.", target: "both" },
+          { question: "I dare you to tell me what part of my body you want to touch first when we meet next, and how.", target: "both" }
+        ],
+        templates: [
+          "Speak in a low, seductive whisper for the next three turns. If you forget and use your normal voice, you owe {other} a photo.",
+          "Put your phone right up to your chest so {other} can hear your heartbeat, or mimic your heartbeat's speed with your fingers on camera.",
+          "Whisper a highly teasing {desire_type} into the phone so quietly that {other} has to press their ear to the speaker to hear it.",
+          "I dare you to describe, using only {whisper_adjective} adjectives, exactly how {other} looked on camera during our last call."
+        ]
+      },
+      vocal_desires: {
+        static: [
+          { question: "Describe, in vivid detail, the very first thing you want us to do when we are finally in the same room again.", target: "both" },
+          { question: "If you could design the perfect wake-up routine for the next time we share a bed, what would it look like?", target: "both" },
+          { question: "What is an intimate fantasy you have only ever imagined over the phone but want to try in real life?", target: "both" },
+          { question: "What is a physical turn-on of mine that gets your heart racing the absolute fastest?", target: "both" },
+          { question: "If you could whisper a single, highly explicit command to me right now that I had to follow the next time we meet, what would it be?", target: "both" },
+          { question: "Describe exactly how you want me to hold you the next time we meet at an airport or station.", target: "both" },
+          { question: "What is your favorite outfit of mine, and what would you want me to do with it when we are alone?", target: "both" },
+          { question: "If we had an entire weekend completely isolated in a luxury cabin, what would be your top priority?", target: "both" },
+          { question: "Describe the most electric physical tension we have ever shared in under 15 words.", target: "both" },
+          { question: "What is a late-night thought about my body that keeps you awake when we are apart?", target: "both" },
+          { question: "If you could choose between a slow, deeply passionate night or a wild, spontaneous adventure next time, which would you pick?", target: "both" },
+          { question: "What part of my body do you find yourself staring at the most when we are on FaceTime?", target: "both" },
+          { question: "Describe the perfect temperature, lighting, and music for our ultimate intimate date night.", target: "both" },
+          { question: "What is a tease or playful gesture of mine that always works on you, without fail?", target: "both" },
+          { question: "Tell me exactly how you want me to take your clothes off next time we are together. Go slow with your description.", target: "both" },
+          { question: "What is the dirtiest thought you have had about me while you were working out or busy during the day?", target: "both" },
+          { question: "If we were in a hotel room right now with absolutely no rules, where is the first place you would put your hands on me?", target: "both" },
+          { question: "Describe how my skin feels against yours based on your memory. What spot do you crave touching most?", target: "both" },
+          { question: "What is a bedroom position we haven't tried yet that you have been secretly looking up or thinking about?", target: "both" },
+          { question: "If I was completely submissive to you for one night, what is the very first thing you would have us do?", target: "both" },
+          { question: "Tell me what part of your body feels the most sensitive right now while we talk about this.", target: "both" },
+          { question: "Describe how you want me to kiss your neck, from the jawline down to your collarbone.", target: "both" }
+        ],
+        templates: [
+          "Confess one secret bedroom fantasy involving {other} that you have been waiting to tell them during a late-night call.",
+          "What is a specific way {other} looks on camera when they are feeling {intimate_vibe_ld} that drives you absolutely crazy?",
+          "If you could whisper any physical command to {other} right now and have them follow it the next time you meet, what would it be?",
+          "Describe how you plan to sensually tease {other}'s {body_part_spicy} using only a {sensual_act} when we are reunited."
+        ]
+      },
+      adult_photo: {
+        static: [
+          { question: "Take and send a photo of your lips to me right now.", target: "both" },
+          { question: "Take and send a photo of your favorite physical feature on your own body right now.", target: "both" },
+          { question: "Take and send a photo of you looking as seductive as possible to me.", target: "both" },
+          { question: "Find and show the single most attractive, heart-racing picture you have of me saved on your phone.", target: "both" },
+          { question: "Show me a photo of yourself on your camera roll that you think is incredibly sexy but have never sent me.", target: "both" },
+          { question: "Take and send a quick, teasing photo of your collarbone or bare shoulder right now.", target: "both" },
+          { question: "Show me a photo of what you are currently wearing under your blanket or clothes.", target: "both" },
+          { question: "Take a photo of your bare legs or feet from a beautiful, cozy angle and send it to me.", target: "both" },
+          { question: "Show me the most provocative outfit you own, even if you are not currently wearing it.", target: "both" },
+          { question: "Take and send a photo of your eyes looking directly into the lens with high intensity.", target: "both" },
+          { question: "Show me a photo of your back or side profile from your camera roll that you find attractive.", target: "both" },
+          { question: "Take and send a picture of your hands wrapped around your phone, or close-up on your fingers.", target: "both" },
+          { question: "Take a photo of your waistline or stomach, pulling your shirt slightly up, and send it to me right now.", target: "both" },
+          { question: "Send me a photo of your lips slightly parted. I want to see them up close.", target: "both" },
+          { question: "Take a photo of you lying down in bed from an angle that makes me feel like I am looking down at you.", target: "both" },
+          { question: "Find and send the most explicit or suggestive picture you have ever taken of yourself.", target: "both" },
+          { question: "Show me a photo of your bare chest, or you in your absolute tightest fitting underwear, right now.", target: "both" },
+          { question: "Take a photo of your neck, tilting your head back so I can see your throat, and send it over.", target: "both" },
+          { question: "Send me a photo showing the view from your bed right now. Make sure your legs are in the frame.", target: "both" },
+          { question: "Take a beautiful, raw close-up photo of your collarbone area and send it to me without any filters.", target: "both" }
+        ],
+        templates: [
+          "Take and send a photo of your {body_part_spicy} to me right now.",
+          "Take and send a photo of you wearing {clothing_vibe} to me.",
+          "Take a quick, beautiful close-up photo of your eyes or neck profile on camera right now.",
+          "Show {other} {adult_photo_type} right now without hovering or looking away.",
+          "Search your camera roll for a late-night photo taken after 1:00 AM. Share the story behind it.",
+          "Take a photo of your {body_part_spicy} pressed against a soft surface, or captured in dim lighting, and send it directly to {other}."
+        ]
+      },
+      would_you_let: {
+        static: [
+          { question: "Would you let me delete one app of my choice from your phone right now?", target: "both" },
+          { question: "Would you let me look through your camera roll without hovering over your shoulder?", target: "both" },
+          { question: "Would you let me choose a secret, funny matching tattoo for both of us to get?", target: "both" },
+          { question: "Would you let me style your outfit, hair, and accessories for a major social event?", target: "both" },
+          { question: "Would you let me read through your oldest diary entries or journal logs?", target: "both" },
+          { question: "Would you let me post whatever photo I want of you on your social media accounts for 24 hours?", target: "both" },
+          { question: "Would you let me plan our entire next holiday without giving you any clues about where we're going?", target: "both" },
+          { question: "Would you let me control your Spotify queue for an entire week of workouts?", target: "both" },
+          { question: "Would you let me order your food at a restaurant without knowing what it is until it arrives?", target: "both" },
+          { question: "Would you let me cut your hair if we were together, even if I promised to do a decent job?", target: "both" },
+          { question: "Would you let me answer all of your incoming texts for the next hour?", target: "both" },
+          { question: "Would you let me set a new early morning routine or alarm schedule for you next week?", target: "both" },
+          { question: "Would you let me pick your next phone background or lock screen picture?", target: "both" },
+          { question: "Would you let me negotiate a major purchase or deal on your behalf?", target: "both" },
+          { question: "Would you let me see your screen time report for this week right now?", target: "both" },
+          { question: "Would you let me throw away one item of clothing from your wardrobe that I think looks terrible?", target: "both" },
+          { question: "Would you let me look through your Instagram or Snapchat Direct Messages for five minutes?", target: "both" },
+          { question: "Would you let me choose your next haircut or hair color?", target: "both" },
+          { question: "Would you let me choose the movie or show we watch for our next three movie nights?", target: "both" },
+          { question: "Would you let me put cold ice down your back without warning?", target: "both" },
+          { question: "Would you let me set a challenge that you have to complete by the end of this week?", target: "both" },
+          { question: "Would you let me organize your desk or bedroom exactly the way I want it?", target: "both" }
+        ],
+        templates: [
+          "Would {p1} let {p2} {let_action}?",
+          "If {p1} asked to {let_risky_action}, would {p2} genuinely say yes?",
+          "Would you let me spend {budget_amount} of your money on a mystery item without checking with you first?",
+          "Would you let {other} choose your daily breakfast, workout routine, and schedule for an entire weekend?"
+        ]
+      },
+      reaction_scenario: {
+        static: [
+          { question: "If I accidentally booked a flight to the wrong city for our holiday, how would you react?", target: "both" },
+          { question: "If I woke you up at 3:00 AM completely dressed up and told you we're going on an adventure, would you get up or go back to sleep?", target: "both" },
+          { question: "If I suddenly showed up at your front door tonight unannounced, what is the very first thing you would do?", target: "both" },
+          { question: "If I confessed that I wanted to move to a foreign country next year for my dream job, how would you react?", target: "both" },
+          { question: "If we got lost in a foreign city with no signal, no money, and no hotel booked, how would you handle it?", target: "both" },
+          { question: "If I accidentally spilled a bright red drink all over your favorite white outfit, what would you say?", target: "both" },
+          { question: "If my parents suddenly asked to meet you over FaceTime in the next five minutes, would you do it?", target: "both" },
+          { question: "If I bought us matching neon-pink tracksuits to wear to a public event, would you wear it with me?", target: "both" },
+          { question: "If I was feeling incredibly sad and refused to talk about it, how would you try to comfort me?", target: "both" },
+          { question: "If I won the lottery tomorrow, what is the very first joint purchase you would pitch to me?", target: "both" },
+          { question: "If we were in public and someone started hitting on me right in front of you, how would you handle it?", target: "both" },
+          { question: "If I cooked you a lavish dinner but it tasted absolutely terrible, would you tell me the truth?", target: "both" },
+          { question: "If we got stuck in an elevator together for four hours, how would we pass the time?", target: "both" },
+          { question: "If I got a massive, highly visible tattoo of a completely ridiculous meme on my arm, what would you say?", target: "both" },
+          { question: "If we went out for dinner and I forgot my wallet, leaving you with a massive bill, how would you react?", target: "both" },
+          { question: "If I spent an entire weekend ignoring my phone because I wanted a digital detox, how would you feel?", target: "both" },
+          { question: "If I got into a heated verbal argument with a complete stranger in public, what would you do?", target: "both" },
+          { question: "If I suddenly adopted a massive, highly energetic dog without asking you first, how would you react?", target: "both" },
+          { question: "If I got cast in a popular reality TV show and had to leave for three months, would you support me?", target: "both" },
+          { question: "If I fell asleep on FaceTime while we were in the middle of a very serious, emotional conversation, how would you react?", target: "both" }
+        ],
+        templates: [
+          "If {p1} suddenly {reaction_trigger}, what would {p2}'s honest reaction be?",
+          "Imagine {p1} surprise-gifted you with a {surprise_gift}. How would you react?",
+          "If {other} confessed that they secretly hated your absolute favorite food, how would you respond?"
+        ]
+      },
+      whats_something: {
+        static: [
+          { question: "What's something about my personality that you've only noticed recently?", target: "both" },
+          { question: "What's something about the way I handle stress that you admire?", target: "both" },
+          { question: "What's something about my style or clothes that always stands out to you?", target: "both" },
+          { question: "What's something about my voice or tone that instantly tells you what kind of mood I am in?", target: "both" },
+          { question: "What's something about my style of arguing or debating that you appreciate?", target: "both" },
+          { question: "What's something about my daily routine or work ethic that motivates you to improve yourself?", target: "both" },
+          { question: "What's something about my relationship with my family or friends that you admire?", target: "both" },
+          { question: "What's something about my physical appearance that you think is completely underrated?", target: "both" },
+          { question: "What's something about the way we communicate that you think makes us unique?", target: "both" },
+          { question: "What's something about my favorite hobbies or interests that you secretly find fascinating?", target: "both" },
+          { question: "What's something about my sense of humor that makes you laugh the hardest?", target: "both" },
+          { question: "What's something about my mindset or logic that challenges you to think differently?", target: "both" },
+          { question: "What's something about my face when I am deeply focused on a task?", target: "both" },
+          { question: "What's something about my posture or walk that you find particularly confident?", target: "both" },
+          { question: "What's something about the way I text you when I am excited that always makes you smile?", target: "both" },
+          { question: "What's something about my taste in music or films that has slowly influenced you?", target: "both" },
+          { question: "What's something about my physical presence that makes you feel instantly safe when we are together?", target: "both" },
+          { question: "What's something about the way I handle cash, spending, or financial planning that you observe?", target: "both" },
+          { question: "What's something about my competitive nature that stands out when we play games?", target: "both" },
+          { question: "What's something about the way I dress when I am just lounging around that you find attractive?", target: "both" }
+        ],
+        templates: [
+          "What is something about {other}'s {observed_trait} that makes you feel deeply loved?",
+          "What's something about {other}'s childhood personality that you wish you could have witnessed?",
+          "What's something about the way we interact on FaceTime that you find incredibly comforting?",
+          "What is something about {other}'s drive or personal ambitions that you think will take them incredibly far in life?"
+        ]
+      },
+      photo_challenge: {
+        static: [
+          { question: "Find and show the oldest selfie of us together on your phone right now.", target: "both" },
+          { question: "Find a photo on your phone that perfectly sums up our dynamic as a couple.", target: "both" },
+          { question: "Show me the last photo you took of food or drink on your phone. Why did you take it?", target: "both" },
+          { question: "Find and show me the most embarrassing childhood photo you have saved on your camera roll.", target: "both" },
+          { question: "Show me a screenshot of your most used apps or screen time summary from today.", target: "both" },
+          { question: "Find and show me a photo from the most adventurous trip or day out you've had recently.", target: "both" },
+          { question: "Find a photo on your camera roll of your favorite physical workout, gym moment, or athletic achievement.", target: "both" },
+          { question: "Show me a photo of something you bought recently that you are absolutely obsessed with.", target: "both" },
+          { question: "Find and show me a photo of your favorite spot or view in your local city.", target: "both" },
+          { question: "Show me a photo of your daily comfort food or go-to coffee order.", target: "both" },
+          { question: "Find and show me a picture of you wearing your absolute favorite casual outfit.", target: "both" },
+          { question: "Show me the absolute funniest meme or video screenshot you have saved in your camera roll.", target: "both" },
+          { question: "Find a photo that represents a major personal goal or milestone you achieved in the past year.", target: "both" },
+          { question: "Find and show a photo of your favorite sibling, family member, or close childhood friend.", target: "both" },
+          { question: "Show me the most aesthetically beautiful sunset or landscape photo you have taken yourself.", target: "both" },
+          { question: "Show me a screenshot of your current music playlist or recently played queue.", target: "both" },
+          { question: "Find a photo of the most delicious meal you have ever cooked or prepared yourself.", target: "both" },
+          { question: "Show me the very last photo currently saved in your camera roll, regardless of what it is.", target: "both" },
+          { question: "Find and show a photo of you looking completely dressed up or fancy for an event.", target: "both" },
+          { question: "Show me a photo of your pets, or an animal you met recently that you fell in love with.", target: "both" }
+        ],
+        templates: [
+          "Find and show {other} {photo_challenge_type} on your camera roll.",
+          "Go to your camera roll and search for the word '{search_keyword}'. Show {other} the first photo that pops up!",
+          "Take a quick, silly candid photo of {other} right now and save it as their contact picture."
+        ]
+      },
+      deep: {
+        static: [
+          { question: "What is a fear you hold that you rarely talk about out loud?", target: "both" },
+          { question: "If you could look ten years into your future self, what is the single biggest question you would ask?", target: "both" },
+          { question: "What is a personal dream or project you haven't started because you are afraid of failing?", target: "both" },
+          { question: "What does support look like to you when you are feeling completely overwhelmed by life?", target: "both" },
+          { question: "What is the biggest misconception people have about you when they first meet you?", target: "both" },
+          { question: "What is a value or principle you would never compromise on, no matter what?", target: "both" },
+          { question: "What is a lesson from a past mistake that has shaped how you live your life today?", target: "both" },
+          { question: "How do you define success for yourself, outside of money or career?", target: "both" },
+          { question: "What is something you are still trying to forgive yourself for?", target: "both" },
+          { question: "Who has had the single most profound impact on your personal growth, and why?", target: "both" },
+          { question: "What is a habit or mindset you are currently trying to unlearn?", target: "both" },
+          { question: "When do you feel most aligned with your true self?", target: "both" },
+          { question: "What does spiritual growth or internal peace mean to you?", target: "both" },
+          { question: "If you could change one event in your past, would you, or do you value the lessons too much?", target: "both" },
+          { question: "What is a hard truth about yourself that you have had to accept recently?", target: "both" },
+          { question: "What is the most vulnerable you have ever allowed yourself to be with another person?", target: "both" },
+          { question: "How do you think your childhood experiences have influenced your attachment style today?", target: "both" },
+          { question: "What is a dream you had as a child that you had to let go of as you grew older?", target: "both" },
+          { question: "What part of your personality do you think is the hardest for other people to understand?", target: "both" },
+          { question: "What are you most proud of in terms of your personal growth and maturity over the past year?", target: "both" },
+          { question: "If you had to define your relationship with God, faith, or the universe, how would you describe it?", target: "both" }
+        ],
+        templates: [
+          "What is a piece of advice you received during your {life_era} that still influences how you make decisions today?",
+          "Which personal milestone or achievement are you currently working toward that makes you feel most alive?",
+          "If you could resolve one lingering mystery or question about your {childhood_aspect}, would you do it?"
+        ]
+      },
+      flirty: {
+        static: [
+          { question: "What is something I do without realizing that you find incredibly attractive?", target: "both" },
+          { question: "If we had to spend an entire Sunday afternoon locked in our bedroom, how would we spend it?", target: "both" },
+          { question: "What is your favorite place to touch me when we are out in public together?", target: "both" },
+          { question: "If you could kiss me right now, where on my face or neck would you start?", target: "both" },
+          { question: "What is the most attractive quality about my voice on our calls?", target: "both" },
+          { question: "What outfit of mine makes you stare at me the longest?", target: "both" },
+          { question: "Describe your absolute dream morning cuddle session with me.", target: "both" },
+          { question: "What is a cheeky thought you had about me today before we hopped on this call?", target: "both" },
+          { question: "If we were in a movie theatre right now, would you focus on the film or on me?", target: "both" },
+          { question: "What is something sweet or teasing you want to whisper in my ear the next time we meet?", target: "both" },
+          { question: "How long can you hold my gaze on screen without blushing or looking away?", target: "both" },
+          { question: "What is your favorite physical feature of mine, and why is it so special to you?", target: "both" },
+          { question: "Describe the most flirty text message I have ever sent you.", target: "both" },
+          { question: "If you could whisper a cheeky dare to me right now, what would it be?", target: "both" },
+          { question: "If we were at a formal party tonight, how would you secretly let me know you wanted to leave and be alone with me?", target: "both" },
+          { question: "What is a physical habit of mine (like playing with my hair or biting my lip) that drives you crazy?", target: "both" },
+          { question: "If you woke up to find me spooning you tomorrow morning, what would you do?", target: "both" },
+          { question: "What is your absolute favorite way to touch my face or run your hands through my hair?", target: "both" },
+          { question: "If we had to share a single dessert right now, would you feed me or make me steal a bite from you?", target: "both" },
+          { question: "What is the most playful, teasing text message you have ever drafted but decided not to send?", target: "both" }
+        ],
+        templates: [
+          "If we were to plan a secret, highly romantic {date_vibe} date for this weekend, what would be the main activity?",
+          "What is a specific look or outfit of {other}'s that always drives you crazy in the best way?"
+        ]
+      },
+      future: {
+        static: [
+          { question: "Where do you honestly see us living in exactly five years from today?", target: "both" },
+          { question: "What is one professional or financial milestone you want us to conquer as a team?", target: "both" },
+          { question: "How do you think our daily routines will look when we are older and more settled down?", target: "both" },
+          { question: "What are your main goals regarding fitness, health, and physical results over the next year?", target: "both" },
+          { question: "How do you plan to build financial independence, and how can we support each other?", target: "both" },
+          { question: "What is your dream home layout, style, and geographic location?", target: "both" },
+          { question: "How do you feel about traveling the world while working remotely or building personal projects?", target: "both" },
+          { question: "What is a major skill or trade you want us both to learn together over the next few years?", target: "both" },
+          { question: "How do you want to handle budgeting, investing, and wealth building once we are settled?", target: "both" },
+          { question: "What kind of habits do you want us to cultivate to maintain high mental and physical performance?", target: "both" },
+          { question: "Do you want to live in a fast-paced urban city or a quiet, high-end suburban retreat?", target: "both" },
+          { question: "What is a business or creative project you want us to launch together in the future?", target: "both" },
+          { question: "How do you see us celebrating major anniversaries and milestones in ten years?", target: "both" },
+          { question: "What is your perspective on raising a family, and what values would you want to pass down?", target: "both" },
+          { question: "How do you think we can continue to prioritize our romantic relationship when life gets busy in the future?", target: "both" },
+          { question: "If you could start a private investment or business portfolio with me next year, what industry would you target?", target: "both" },
+          { question: "What is your philosophy on balancing hard work and relaxation as we build our lives?", target: "both" },
+          { question: "What kind of legacy or long-term reputation do you want us to build as a couple?", target: "both" },
+          { question: "How do you think our individual goals will merge as we make future life decisions?", target: "both" }
+        ],
+        templates: [
+          "If we could suddenly buy our dream {house_type} in {location_type} tomorrow, what is the first custom room you'd design?",
+          "What is one positive lifestyle habit you want us to build together over the next {time_period}?",
+          "If you could secure the future funding for any joint personal project, what would it be?"
+        ]
+      },
+      nostalgia: {
+        static: [
+          { question: "What was your go-to excuse to get out of trouble when you were in school?", target: "both" },
+          { question: "Who was your absolute worst school teacher, and what did they do to earn that title?", target: "both" },
+          { question: "What was your favorite playground or neighborhood game to play as a kid?", target: "both" },
+          { question: "What was your absolute favorite retro television show, cartoon, or video game growing up?", target: "both" },
+          { question: "What is the funniest or most rebellious thing you did in school that you got away with?", target: "both" },
+          { question: "What song instantly takes you back to your early high school or childhood days?", target: "both" },
+          { question: "Who was your very first childhood or schoolyard crush, and how did you act around them?", target: "both" },
+          { question: "What is a scent, food, or sound that immediately triggers intense childhood nostalgia for you?", target: "both" },
+          { question: "What was your favorite school subject, and was it because of the topic or the teacher?", target: "both" },
+          { question: "What is the most ridiculous fashion trend or haircut you proudly rocked when you were younger?", target: "both" },
+          { question: "What did you think your life would look like at 17 or 18 when you were a little kid?", target: "both" },
+          { question: "What is your favorite memory of a childhood summer or family vacation?", target: "both" },
+          { question: "What is the most memorable toy or birthday present you ever received as a child?", target: "both" },
+          { question: "What is the story behind your very first mobile phone, and what did you use it for most?", target: "both" },
+          { question: "What was the most dramatic event or rumor that happened in your high school year group?", target: "both" },
+          { question: "Did you have a favorite hiding spot or quiet place to think when you were growing up?", target: "both" },
+          { question: "What is a traditional meal or family recipe that instantly makes you feel like a kid again?", target: "both" },
+          { question: "What was your biggest irrational fear when you were a child (e.g. monsters under the bed, quicksand)?", target: "both" },
+          { question: "Who was your best friend in primary school, and are you still in touch with them today?", target: "both" }
+        ],
+        templates: [
+          "What is the most rebellious thing you did during your {life_era} that your family still doesn't know about?",
+          "If you could go back and change one minor detail about your {childhood_aspect}, what would it be?"
+        ]
+      },
+      travel: {
+        static: [
+          { question: "If we could drop everything and board a flight right now, what is our destination?", target: "both" },
+          { question: "Are you more of an active outdoor explorer or a lie-by-the-pool holidaymaker?", target: "both" },
+          { question: "What is your absolute worst travel horror story, and how did you survive it?", target: "both" },
+          { question: "What is the most beautiful natural wonder or landscape you have ever seen in person?", target: "both" },
+          { question: "If we had unlimited funds for a single two-week vacation, what is our exact itinerary?", target: "both" },
+          { question: "Would you rather explore a historic, bustling ancient city or relax in an ultra-luxurious beach resort?", target: "both" },
+          { question: "What is a travel destination that you think is completely underrated?", target: "both" },
+          { question: "What are your top three bucket-list experiences that we absolutely must check off together?", target: "both" },
+          { question: "Are you a meticulous planner who maps out every hour, or do you prefer spontaneous exploring?", target: "both" },
+          { question: "What is the best meal you have ever had while traveling, and where was it?", target: "both" },
+          { question: "Would you rather go on a rugged, scenic road trip or fly first-class to a tropical island?", target: "both" },
+          { question: "What is the longest flight or journey you have ever taken, and how did you pass the time?", target: "both" },
+          { question: "If you could live in any city in the world for exactly one year, where would you choose?", target: "both" },
+          { question: "Do you prefer packing extremely light with just a backpack, or do you need a massive suitcase for options?", target: "both" },
+          { question: "What is your philosophy on taking photos while traveling? Are you documenting everything, or just living in the moment?", target: "both" },
+          { question: "What is the most culturally different place you have ever visited, and what did you learn from it?", target: "both" },
+          { question: "If we could go on an intense, high-adrenaline adventure (like skydiving or white-water rafting), would you do it with me?", target: "both" },
+          { question: "What is your go-to airport routine? Are you there three hours early, or sprinting to the gate at the last minute?", target: "both" },
+          { question: "If you could buy a holiday home anywhere in the world, what country or island would it be on?", target: "both" }
+        ],
+        templates: [
+          "If we were planning a rugged, off-grid backpacking trip through {scenic_destination}, what is the one luxury item you'd sneak into your bag?",
+          "What is your absolute favorite way to spend a quiet morning in a foreign {location_type}?"
+        ]
+      },
+      unpopular: {
+        static: [
+          { question: "Which popular movie, band, or food does everyone seem to love but you secretly hate?", target: "both" },
+          { question: "Is a completely clean room essential for your focus, or is a chaotic space better for your creativity?", target: "both" },
+          { question: "Is pineapple on pizza truly a culinary masterpiece or an absolute disaster? Defend your stance.", target: "both" },
+          { question: "Do you think social media has done more to connect people or isolate them from reality?", target: "both" },
+          { question: "What is a popular fashion trend right now that you find absolutely ridiculous?", target: "both" },
+          { question: "Is sleeping with socks on cozy and practical, or is it an absolute crime?", target: "both" },
+          { question: "Do you prefer movie sequels and franchises, or do you value original stand-alone films more?", target: "both" },
+          { question: "Which major fast-food chain or restaurant is completely overrated in your opinion?", target: "both" },
+          { question: "Is cereal a soup? Defend your logical reasoning.", target: "both" },
+          { question: "Do you think working out in the early morning is superior to training late at night?", target: "both" },
+          { question: "Is hot coffee superior to iced coffee, regardless of the season?", target: "both" },
+          { question: "What is an unpopular opinion you hold about modern music or popular artists today?", target: "both" },
+          { question: "Do you believe going to university or college is still necessary for career success today?", target: "both" },
+          { question: "Is Marvel/DC completely overrated now, or are you still a massive fan of superhero movies?", target: "both" },
+          { question: "Do you think reading physical books is vastly superior to listening to audiobooks or reading on Kindle?", target: "both" },
+          { question: "Is ketchup the single worst condiment in existence, or does it belong on almost everything?", target: "both" },
+          { question: "Do you think modern art galleries are full of actual talent, or is most of it complete nonsense?", target: "both" },
+          { question: "Is summer the absolute worst season because of the heat, and is autumn/winter vastly superior?", target: "both" },
+          { question: "Should phone calls completely replace texting for important or casual conversations?", target: "both" },
+          { question: "Do you think pop music is generic and lazy compared to older generations of rock, rap, or indie music?", target: "both" }
+        ],
+        templates: [
+          "What is a modern {media_type} trend that makes you feel completely out of touch with the world?",
+          "Which of {other}'s quirky habits do you secretly think is a bit weird, even if you find it endearing?"
+        ]
+      },
+      would_you_rather: {
+        static: [
+          { question: "Would you rather have a key to a luxury apartment in Tokyo, or a cozy off-grid cabin in the Swiss Alps?", target: "both" },
+          { question: "Would you rather always know when someone is lying to you, or always get away with your own white lies?", target: "both" },
+          { question: "Would you rather be able to read minds but never turn it off, or never be able to speak again?", target: "both" },
+          { question: "Would you rather travel back in time to meet your ancestors, or travel 100 years into the future?", target: "both" },
+          { question: "Would you rather always have to speak your mind out loud, or never be allowed to speak at all?", target: "both" },
+          { question: "Would you rather have the power of flight but only at a walking speed, or super-speed but only when running backwards?", target: "both" },
+          { question: "Would you rather live in a world with no music or a world with no television and movies?", target: "both" },
+          { question: "Would you rather have to work out for 3 hours every day or stick to a highly restrictive diet with no cheat meals?", target: "both" },
+          { question: "Would you rather always have a slightly slow internet connection or always have a low phone battery?", target: "both" },
+          { question: "Would you rather have an unlimited budget for travel or have your dream home completely paid for?", target: "both" },
+          { question: "Would you rather always have to whisper when talking on call, or always have to hold my hand in public?", target: "both" },
+          { question: "Would you rather know the exact date of your future milestones, or live completely in surprise?", target: "both" },
+          { question: "Would you rather be extremely rich but have to live in a tiny, crowded studio flat, or live in a massive mansion but be completely broke?", target: "both" },
+          { question: "Would you rather have the ability to speak any language fluently, or be able to play any musical instrument perfectly?", target: "both" },
+          { question: "Would you rather never have to wash dishes again, or never have to do laundry again?", target: "both" },
+          { question: "Would you rather have a completely public life where everyone knows your name, or a completely private life with absolute peace?", target: "both" },
+          { question: "Would you rather have the ultimate dream body without having to work out, or eat whatever you want without gaining weight?", target: "both" },
+          { question: "Would you rather lose all of your saved digital memories (photos/videos) or all of your physical childhood keepsakes?", target: "both" },
+          { question: "Would you rather always have to speak in rhymes or always have to sing instead of speaking?", target: "both" }
+        ],
+        templates: [
+          "Would you rather let {other} control your {media_type} accounts for a week, or your personal budget?",
+          "Would you rather spend an entire year traveling the world in a luxury RV, or have {other} cook you a gourmet dinner every night?"
+        ]
+      },
+      how_well: {
+        static: [
+          { question: "What is my absolute ultimate comfort food when I've had a difficult day?", target: "both" },
+          { question: "How do I take my coffee or tea, and what is my go-to order at a local cafe?", target: "both" },
+          { question: "What is my biggest pet peeve or thing that instantly annoys me?", target: "both" },
+          { question: "What is my absolute favorite song, genre, or musical artist to play when I am driving or working out?", target: "both" },
+          { question: "What is my dream career or personal project that I talk about the most?", target: "both" },
+          { question: "If I could only wear one color of clothing for the rest of my life, what would you guess it is?", target: "both" },
+          { question: "What was the name of my first pet, or my absolute favorite animal?", target: "both" },
+          { question: "Am I more of an early bird who loves sunrises, or a late-night night owl?", target: "both" },
+          { question: "What is my go-to exercise or favorite muscle group to train when I'm at the gym?", target: "both" },
+          { question: "What is a quirky habit or facial expression I make when I am deeply thinking or concentrated?", target: "both" },
+          { question: "Which movie, show, or book series have I watched or read more times than I can count?", target: "both" },
+          { question: "What is my exact birthdate, including the day, month, and year?", target: "both" },
+          { question: "What is my absolute favorite memory that we have shared together so far?", target: "both" },
+          { question: "What is my absolute biggest fear in life? Is it a physical thing (like heights) or an abstract concept?", target: "both" },
+          { question: "If I could have any superpower, what would I choose? Guess my exact reasoning.", target: "both" },
+          { question: "Am I closer to my mother or my father? Explain why you think that.", target: "both" },
+          { question: "What is my favorite physical feature on my own body? See if you can guess what I think.", target: "both" },
+          { question: "What is the one luxury item I am currently saving up to buy?", target: "both" },
+          { question: "What is my favorite season of the year, and what is my absolute favorite holiday?", target: "both" },
+          { question: "How do I deal with being extremely angry or upset? Do I go silent, or do I need to vent immediately?", target: "both" }
+        ],
+        templates: [
+          "Guess what {other} thinks is their own single most unique habit or personal routine.",
+          "What is {other}'s ultimate dream travel destination that they talk about at least once a month?"
+        ]
+      }
+    };
+
+    // Variable lists for template replacements
+    const TEMPLATE_VARIABLES = {
+      whisper_adjective: ["extremely sweet and romantic", "highly enticing", "playful and warm", "passionate", "vulnerable", "incredibly explicit and direct", "deeply sensual", "thrilling", "teasing"],
+      sensual_focus_ld: ["lips while smiling", "slow morning routine when together", "expression when you lock eyes on camera", "warm embrace at the airport", "bare neck catching the light", "fingertips brushing against skin", "heavy breathing over the speaker"],
+      desire_type: ["fantasy you've never mentioned", "playful late-night compliment", "cheeky prediction for the next time we meet", "highly explicit bedroom idea", "sensual tease about how I want to touch you"],
+      let_action: [
+        "shave one of your eyebrows while you sleep",
+        "choose your outfit for the next major party we attend",
+        "go through all of your direct messages with no questions asked",
+        "have full control over your Spotify playlist for a whole day",
+        "order a mystery delivery meal for you tonight and you have to eat all of it",
+        "set your lockscreen to an embarrassing picture of me for a week",
+        "inspect your entire camera roll from the past month",
+        "send a random emoji from your phone to your most recent contact"
+      ],
+      let_risky_action: [
+        "borrow your car for an off-road road trip",
+        "post a completely random childhood photo of you on your Instagram story",
+        "permanently delete your favorite mobile game or app",
+        "cut your hair using kitchen scissors right now",
+        "text your boss or teacher a completely nonsensical message",
+        "let me buy an outfit for you online that you have to wear on our next date"
+      ],
+      budget_amount: ["£50", "£150", "£300", "£20", "£500", "£1000", "£10"],
+      reaction_trigger: [
+        "surprise-booked a vacation flight that leaves in exactly 4 hours",
+        "dyed their hair a brilliant shade of neon green",
+        "accidentally dropped your phone face down on concrete",
+        "got a small tattoo of your initials on their ankle",
+        "won a free luxury cruise but we have to leave tomorrow",
+        "bought a massive pet snake and brought it home",
+        "completely rearranged all your personal furniture while you were out"
+      ],
+      surprise_gift: ["premium set of matching luxury gym-wear", "handcrafted album of our raw moments", "first-class weekend getaway ticket", "completely bespoke personalized piece of jewelry", "sleek new tablet for reading and planning", "private gourmet dining experience in our room"],
+      observed_trait: ["daily morning routine", "unspoken habit when they are excited", "way they look at you when you walk in", "incredibly disciplined work-ethic", "competitive focus when playing video games", "way they manage their fitness and diet targets"],
+      photo_challenge_type: [
+        "the absolute worst, most hilarious facial expression photo of them",
+        "a screenshot that perfectly explains your humor style",
+        "the most aesthetically beautiful scenic photo you took last month",
+        "the last photo on your camera roll featuring fitness or workouts",
+        "your current body stats or a progress photo you took at the gym",
+        "the most nostalgic physical object currently in your room",
+        "a photo of the workspace or desk where you spend your focus hours"
+      ],
+      search_keyword: ["gym", "happy", "party", "night", "travel", "funny", "food", "workout", "abs", "sunset", "nature", "meme"],
+      sensual_focus: ["collarbones", "hands locked with yours", "warm neck profile", "lips in mid-smile", "bare waistline", "slow eye contact", "breath against your ear"],
+      adult_photo_type: [
+        "the most enticing picture of you wearing your absolute best outfit",
+        "a private candid photo of me that you stare at when we are apart",
+        "the last late-night image you sent me that made your heart skip a beat",
+        "a photo of you in your absolute tightest activewear or gym shorts",
+        "your bare chest or midriff captured in low light"
+      ],
+      body_part_spicy: [
+        "lips from a close-up angle", 
+        "collarbone with your shirt slightly pulled back", 
+        "neck profile", 
+        "wink or seductive eyes", 
+        "hands from a beautiful angle",
+        "bare waistline pulling your waistband slightly",
+        "inner thigh catching the light",
+        "lower stomach or pelvic area"
+      ],
+      clothing_vibe: [
+        "your most flattering outfit", 
+        "your favorite sleepwear", 
+        "something that makes you feel incredibly confident", 
+        "the outfit I find most attractive on you",
+        "absolutely nothing under a loose towel or blanket",
+        "your gym clothes showing your physical results"
+      ],
+      location_type: ["cliffside villa in Italy", "cozy wooden cabin in Scandinavia", "hidden overwater bungalow in Bora Bora", "modern penthouse in Kyoto", "rustic stone farmhouse in Provence", "isolated high-end cabin with a private hot tub", "luxury high-rise overlooking Central Park"],
+      anniversary_event: ["first ever official date", "first trip out of town", "most spontaneous late-night walk", "last major celebration together", "warmest memory of laughing together", "moment we realized we were fully committed"],
+      life_era: ["early high school days", "most challenging transition phase", "past two years of personal growth", "childhood memories", "latest career step", "first weeks of sixth form"],
+      childhood_aspect: ["relationship with your siblings", "oldest childhood neighborhood friends", "favorite weekend rituals", "biggest childhood dream job", "schoolyard memories", "rebellious high school phases"],
+      date_vibe: ["candlelit, dressed-up", "cozy, rain-slicked indoor", "spontaneous road-trip style", "midnight picnic under the stars", "high-end culinary exploration", "late-night workout and meal prep session"],
+      count: ["exactly three", "only five", "just four", "exactly two", "seven distinct"],
+      media_type: ["Spotify playlists", "Instagram direct messages", "Netflix viewing history", "YouTube recommended feed", "camera roll", "CapCut or video editing drafts", "Snapchat histories"],
+      adjective_count: ["three highly descriptive", "two intense", "four playful", "three sensual", "five explicit", "two teasing"],
+      gift_type: ["perfectly curated vintage vinyl record", "handwritten book of shared memories", "spontaneous flight ticket to Europe", "gourmet dessert made from scratch", "bespoke piece of jewelry", "highly personalized gym gymbag with custom gear"],
+      intimate_vibe_ld: ["winding down late at night on FaceTime", "cuddling early in the morning on call", "stealing a quiet moment away to talk to you", "talking in low whispers while your family is asleep"],
+      house_type: ["glass-walled architectural masterpiece", "cozy stone cabin with a giant fireplace", "sleek, ultra-modern downtown penthouse", "spacious beachfront loft with sunset views", "brutalist high-performance smart loft"],
+      time_period: ["six months", "three years", "five years", "twelve months", "ten years"],
+      scenic_destination: ["the rugged coastlines of Scotland", "the deep tropical rainforests of Costa Rica", "the gorgeous winding fjords of Norway", "the high-altitude peaks of the Andes", "the crystal clear waters of the Greek Islands"]
+    };
+
+    // ==========================================
+    // APP STATE MANAGEMENT
+    // ==========================================
+    let state = {
+      names: { p1: '', p2: '' },
+      relationship: { status: 'Dating', anniversary: '' },
+      settings: { haptics: true, animations: true, darkMode: true, fontSize: 'lg' },
+      favorites: [],
+      currentScreen: 'onboarding',
+      currentCategory: null,
+      currentQuestion: null,
+      deckHistory: [],
+      deckHistoryIndex: -1
+    };
+
+    // --- Bootstrapper ---
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      initUI();
+      initFloatingHearts();
+      document.getElementById('current-year').textContent = new Date().getFullYear();
+    });
+
+    function loadState() {
+      const namesSaved = localStorage.getItem(`${APP_ID}:names`);
+      const relSaved = localStorage.getItem(`${APP_ID}:relationship`);
+      const settingsSaved = localStorage.getItem(`${APP_ID}:settings`);
+      const favSaved = localStorage.getItem(`${APP_ID}:favorites`);
+
+      if (namesSaved) state.names = JSON.parse(namesSaved);
+      if (relSaved) state.relationship = JSON.parse(relSaved);
+      if (settingsSaved) state.settings = JSON.parse(settingsSaved);
+      if (favSaved) state.favorites = JSON.parse(favSaved);
+
+      // Route screen based on setup completion
+      if (state.names.p1 && state.names.p2) {
+        state.currentScreen = 'dashboard';
+      } else {
+        state.currentScreen = 'onboarding';
+      }
+    }
+
+    function saveState(key, data) {
+      localStorage.setItem(`${APP_ID}:${key}`, JSON.stringify(data));
+    }
+
+    // --- UI INITS ---
+    function initUI() {
+      applyThemeSettings();
+      renderRelationshipStatusOptions();
+      updateDashboardData();
+      renderCategories();
+      navigateTo(state.currentScreen);
+    }
+
+    function triggerHaptic() {
+      if (state.settings.haptics && navigator.vibrate) {
+        navigator.vibrate(25);
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      toastMsg.textContent = msg;
+      
+      toast.classList.remove('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      setTimeout(() => {
+        toast.classList.add('translate-y-[-100px]', 'opacity-0', 'pointer-events-none');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2500);
+    }
+
+    // --- NAVIGATION CONTROLLER ---
+    function navigateTo(screenId) {
+      state.currentScreen = screenId;
+      document.querySelectorAll('.screen').forEach(scr => scr.classList.add('hidden'));
+      
+      const targetScreen = document.getElementById(`screen-${screenId}`);
+      if (targetScreen) targetScreen.classList.remove('hidden');
+
+      // Toggle Header visibility logic
+      const headerControls = document.getElementById('header-controls');
+      if (screenId === 'onboarding') {
+        headerControls.classList.add('hidden');
+        // Populate inputs from state if any
+        document.getElementById('input-p1').value = state.names.p1;
+        document.getElementById('input-p2').value = state.names.p2;
+        document.getElementById('input-anniversary').value = state.relationship.anniversary;
+      } else {
+        headerControls.classList.remove('hidden');
+      }
+
+      if (screenId === 'dashboard') {
+        updateDashboardData();
+      }
+
+      if (screenId === 'favorites') {
+        renderFavorites();
+      }
+
+      if (screenId === 'settings') {
+        syncSettingsUI();
+      }
+
+      triggerHaptic();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- ONBOARDING ACTIONS ---
+    function renderRelationshipStatusOptions() {
+      const options = ['Dating', 'Talking Stage', 'Married', 'Engaged', 'Custom'];
+      const container = document.getElementById('relationship-status-options');
+      container.innerHTML = options.map(opt => `
+        <button onclick="setRelationshipStatus('${opt}')" id="rel-opt-${opt.replace(' ', '')}" class="py-2 px-3 text-xs font-semibold rounded-xl border transition-all bg-white/5 border-white/10 hover:bg-white/10 text-white/80">
+          ${opt}
+        </button>
+      `).join('');
+      updateRelationshipStatusButtonUI();
+    }
+
+    function setRelationshipStatus(status) {
+      triggerHaptic();
+      state.relationship.status = status;
+      updateRelationshipStatusButtonUI();
+    }
+
+    function updateRelationshipStatusButtonUI() {
+      document.querySelectorAll('#relationship-status-options button').forEach(btn => {
+        btn.className = "py-2 px-3 text-xs font-semibold rounded-xl border transition-all bg-white/5 border-white/10 hover:bg-white/10 text-white/80";
+      });
+      const selectedBtn = document.getElementById(`rel-opt-${state.relationship.status.replace(' ', '')}`);
+      if (selectedBtn) {
+        selectedBtn.className = "py-2 px-3 text-xs font-semibold rounded-xl border transition-all bg-gradient-to-r from-pink-500 to-rose-500 border-transparent text-white shadow-lg";
+      }
+    }
+
+    function submitOnboarding() {
+      const p1 = document.getElementById('input-p1').value.trim();
+      const p2 = document.getElementById('input-p2').value.trim();
+      const anniversary = document.getElementById('input-anniversary').value;
+
+      if (!p1 || !p2) {
+        showToast("Please enter both names to start! ❤️");
+        return;
+      }
+
+      state.names = { p1, p2 };
+      state.relationship.anniversary = anniversary;
+      
+      saveState('names', state.names);
+      saveState('relationship', state.relationship);
+
+      showToast("Welcome to After Hours! ❤️");
+      navigateTo('dashboard');
+    }
+
+    // --- DASHBOARD ACTIONS ---
+    function updateDashboardData() {
+      document.getElementById('profile-names').textContent = `${state.names.p1} & ${state.names.p2}`;
+      document.getElementById('profile-status').textContent = state.relationship.status;
+      
+      const profileAnniversary = document.getElementById('profile-anniversary');
+      if (state.relationship.anniversary) {
+        profileAnniversary.innerHTML = `<i data-lucide="calendar" class="w-3 h-3"></i> Since ${new Date(state.relationship.anniversary).toLocaleDateString()}`;
+      } else {
+        profileAnniversary.innerHTML = '';
+      }
+      
+      document.getElementById('saved-cards-count').textContent = `${state.favorites.length} prompts bookmarked.`;
+      lucide.createIcons();
+    }
+
+    function editProfile() {
+      navigateTo('onboarding');
+    }
+
+    function renderCategories() {
+      const container = document.getElementById('categories-list');
+      container.innerHTML = CATEGORIES.map(cat => `
+        <button onclick="startCategoryDeck('${cat.id}')" class="w-full text-left bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 p-4 rounded-2xl flex items-center justify-between transition-all group active:scale-95 shadow-md">
+          <div class="flex items-center gap-4">
+            <div class="p-3 rounded-xl bg-gradient-to-tr ${cat.color} shadow-lg text-white">
+              <i data-lucide="${cat.icon}" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-base tracking-wide flex items-center gap-1.5">
+                ${cat.title}
+                ${cat.isMidnight ? `<span class="bg-indigo-500/20 text-indigo-300 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Night Call</span>` : ''}
+                ${cat.isAdult ? `<span class="bg-red-500/20 text-red-300 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider animate-pulse">Spicy</span>` : ''}
+              </h4>
+              <p class="text-xs opacity-60 mt-1 line-clamp-1 pr-6">${cat.desc}</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+        </button>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // --- DYNAMIC QUESTION PROMPT GENERATION ENGINE ---
+    function generatePrompt(categoryKey) {
+      const catData = ENGINE_DATABASE[categoryKey] || ENGINE_DATABASE['relationship'];
+      const isTemplate = Math.random() > 0.45 && catData.templates.length > 0;
+      let rawText = "";
+      let target = "both";
+
+      if (isTemplate) {
+        const template = catData.templates[Math.floor(Math.random() * catData.templates.length)];
+        let processed = template;
+        
+        processed = processed.replace(/{p1}/g, state.names.p1 || "Player 1");
+        processed = processed.replace(/{p2}/g, state.names.p2 || "Player 2");
+        
+        if (processed.includes("{other}")) {
+          const turn = Math.random() > 0.5 ? 'p1' : 'p2';
+          processed = processed.replace(/{other}/g, turn === 'p1' ? state.names.p1 : state.names.p2);
+          target = turn === 'p1' ? 'p2' : 'p1';
+        }
+
+        Object.keys(TEMPLATE_VARIABLES).forEach(vKey => {
+          const regex = new RegExp(`{${vKey}}`, 'g');
+          if (processed.match(regex)) {
+            const varChoices = TEMPLATE_VARIABLES[vKey];
+            const choice = varChoices[Math.floor(Math.random() * varChoices.length)];
+            processed = processed.replace(regex, choice);
+          }
+        });
+
+        rawText = processed;
+      } else {
+        const item = catData.static[Math.floor(Math.random() * catData.static.length)];
+        rawText = item.question;
+        target = item.target;
+      }
+
+      let targetLabel = "Question for Both";
+      if (target === 'p1') {
+        targetLabel = `Question for ${state.names.p1}`;
+      } else if (target === 'p2') {
+        targetLabel = `Question for ${state.names.p2}`;
+      } else if (target === 'male' || target === 'female') {
+        const assign = Math.random() > 0.5 ? state.names.p1 : state.names.p2;
+        targetLabel = `Question for ${assign}`;
+      }
+
+      return {
+        id: `${categoryKey}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        category: categoryKey,
+        question: rawText,
+        targetLabel: targetLabel,
+        difficulty: 'Medium'
+      };
+    }
+
+    // --- GAMEPLAY CORE CONTROLLER ---
+    function startCategoryDeck(catId) {
+      triggerHaptic();
+      const cat = CATEGORIES.find(c => c.id === catId);
+      state.currentCategory = cat;
+      
+      const firstPrompt = generatePrompt(catId);
+      state.deckHistory = [firstPrompt];
+      state.deckHistoryIndex = 0;
+      state.currentQuestion = firstPrompt;
+      
+      document.getElementById('btn-spin-again').classList.add('hidden');
+      updateGameplayUI();
+      navigateTo('game');
+    }
+
+    function startRoulette() {
+      triggerHaptic();
+      const randomCat = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+      state.currentCategory = randomCat;
+      
+      const prompt = generatePrompt(randomCat.id);
+      state.currentQuestion = prompt;
+      state.deckHistory = [prompt];
+      state.deckHistoryIndex = 0;
+
+      document.getElementById('btn-spin-again').classList.remove('hidden');
+      updateGameplayUI();
+      navigateTo('game');
+    }
+
+    function updateGameplayUI() {
+      const cat = state.currentCategory;
+      const q = state.currentQuestion;
+
+      // Update Top Nav
+      document.getElementById('game-cat-title').textContent = cat.title;
+      const topIcon = document.getElementById('game-cat-icon');
+      topIcon.setAttribute('data-lucide', cat.icon);
+      
+      document.getElementById('game-card-counter').textContent = `Card #${state.deckHistoryIndex + 1}`;
+
+      // Update Card Visual Style Based on Category Meta Attributes
+      const card = document.getElementById('game-card');
+      card.className = "relative flex-grow rounded-3xl border flex flex-col justify-between p-6 my-2 shadow-2xl transition-all duration-700 overflow-hidden";
+      
+      if (cat.isMidnight) {
+        card.classList.add('from-indigo-950', 'via-purple-900', 'to-slate-950', 'border-purple-500/30', 'text-white', 'bg-gradient-to-br');
+      } else if (cat.isAdult) {
+        card.classList.add('from-stone-950', 'via-rose-950', 'to-stone-900', 'border-red-500/30', 'text-white', 'bg-gradient-to-br');
+      } else {
+        card.classList.add('from-white/10', 'to-white/5', 'backdrop-blur-xl', 'border-white/10', 'bg-gradient-to-br');
+      }
+
+      // Update Prompt and Target Banner Text
+      document.getElementById('card-target-label').textContent = q.targetLabel;
+      document.getElementById('card-question-text').textContent = `"${q.question}"`;
+
+      // Update Favorite Icon
+      const starIcon = document.getElementById('card-fav-star');
+      const isFav = state.favorites.some(f => f.question === q.question);
+      if (isFav) {
+        starIcon.className = "w-5 h-5 transition-all text-amber-400 fill-amber-400 scale-110";
+      } else {
+        starIcon.className = "w-5 h-5 transition-all opacity-40 hover:opacity-100 text-white";
+      }
+
+      // Update Prev Button disabled status
+      const prevBtn = document.getElementById('btn-prev-card');
+      if (state.deckHistoryIndex <= 0) {
+        prevBtn.classList.add('opacity-20', 'cursor-not-allowed');
+        prevBtn.setAttribute('disabled', 'true');
+      } else {
+        prevBtn.classList.remove('opacity-20', 'cursor-not-allowed');
+        prevBtn.removeAttribute('disabled');
+      }
+
+      applyFontSize();
+      lucide.createIcons();
+    }
+
+    function nextQuestion() {
+      triggerHaptic();
+      if (state.deckHistoryIndex < state.deckHistory.length - 1) {
+        state.deckHistoryIndex++;
+        state.currentQuestion = state.deckHistory[state.deckHistoryIndex];
+      } else {
+        const newPrompt = generatePrompt(state.currentCategory.id);
+        state.deckHistory.push(newPrompt);
+        state.deckHistoryIndex = state.deckHistory.length - 1;
+        state.currentQuestion = newPrompt;
+      }
+      updateGameplayUI();
+    }
+
+    function prevQuestion() {
+      if (state.deckHistoryIndex > 0) {
+        triggerHaptic();
+        state.deckHistoryIndex--;
+        state.currentQuestion = state.deckHistory[state.deckHistoryIndex];
+        updateGameplayUI();
+      }
+    }
+
+    function shuffleQuestion() {
+      triggerHaptic();
+      const fresh = generatePrompt(state.currentCategory.id);
+      state.currentQuestion = fresh;
+      state.deckHistory.push(fresh);
+      state.deckHistoryIndex = state.deckHistory.length - 1;
+      updateGameplayUI();
+    }
+
+    function toggleCurrentFavorite() {
+      triggerHaptic();
+      const q = state.currentQuestion;
+      const isFav = state.favorites.some(f => f.question === q.question);
+      
+      if (isFav) {
+        state.favorites = state.favorites.filter(f => f.question !== q.question);
+        showToast('Removed from Favourites');
+      } else {
+        const newFav = {
+          ...q,
+          savedAt: new Date().toLocaleDateString(),
+          categoryTitle: CATEGORIES.find(c => c.id === q.category)?.title || 'Custom'
+        };
+        state.favorites.unshift(newFav);
+        showToast('Added to Favourites! ❤️');
+      }
+      
+      saveState('favorites', state.favorites);
+      updateGameplayUI();
+    }
+
+    // --- FAVORITES SCREEN INTERACTIONS ---
+    function renderFavorites(query = '') {
+      const list = document.getElementById('favorites-list');
+      const filtered = state.favorites.filter(f => f.question.toLowerCase().includes(query.toLowerCase()));
+      
+      document.getElementById('favs-title').textContent = `Saved Deck (${state.favorites.length})`;
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="text-center py-12 bg-white/5 border border-white/5 rounded-2xl">
+            <i data-lucide="bookmark" class="w-8 h-8 mx-auto mb-2 opacity-30 text-pink-400"></i>
+            <p class="text-sm opacity-60">No saved cards match your search.</p>
+          </div>
+        `;
+      } else {
+        list.innerHTML = filtered.map(item => `
+          <div class="p-4 bg-white/5 border border-white/5 hover:border-white/10 rounded-2xl flex items-start justify-between gap-3 transition-all">
+            <div class="flex-1">
+              <span class="text-[9px] bg-white/10 text-white/75 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider mb-2 inline-block">
+                ${item.categoryTitle}
+              </span>
+              <p class="text-sm font-medium tracking-wide leading-relaxed">
+                "${item.question}"
+              </p>
+            </div>
+            <div class="flex flex-col gap-1 items-end">
+              <button onclick="playSavedCard('${item.id}')" class="bg-pink-500/20 text-pink-300 text-[10px] font-bold px-2.5 py-1 rounded-lg hover:bg-pink-500/30 transition-all">
+                Play Card
+              </button>
+              <button onclick="removeFavoriteCard('${item.id}')" class="p-1.5 rounded-lg hover:bg-white/10 text-rose-500 transition-all">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+      lucide.createIcons();
+    }
+
+    function filterFavorites(value) {
+      renderFavorites(value);
+    }
+
+    function playSavedCard(cardId) {
+      triggerHaptic();
+      const card = state.favorites.find(f => f.id === cardId);
+      if (card) {
+        state.currentCategory = CATEGORIES.find(c => c.id === card.category) || CATEGORIES[0];
+        state.currentQuestion = card;
+        state.deckHistory = [card];
+        state.deckHistoryIndex = 0;
+        
+        document.getElementById('btn-spin-again').classList.add('hidden');
+        updateGameplayUI();
+        navigateTo('game');
+      }
+    }
+
+    function removeFavoriteCard(cardId) {
+      triggerHaptic();
+      state.favorites = state.favorites.filter(f => f.id !== cardId);
+      saveState('favorites', state.favorites);
+      renderFavorites(document.getElementById('favs-search-input').value);
+      showToast('Removed from Favourites');
+    }
+
+    // --- SETTINGS CONTROLLER ---
+    function syncSettingsUI() {
+      // Font Buttons
+      document.querySelectorAll('[id^="font-btn-"]').forEach(btn => {
+        btn.className = "py-1 text-xs font-bold rounded-lg uppercase tracking-wider transition-all hover:bg-white/5 opacity-60";
+      });
+      const activeFontBtn = document.getElementById(`font-btn-${state.settings.fontSize}`);
+      if (activeFontBtn) {
+        activeFontBtn.className = "py-1 text-xs font-bold rounded-lg uppercase tracking-wider transition-all bg-gradient-to-r from-pink-500 to-rose-500 text-white";
+      }
+
+      // Switches
+      updateSwitchUI('haptics');
+      updateSwitchUI('animations');
+      updateSwitchUI('darkMode');
+    }
+
+    function updateSwitchUI(key) {
+      const toggle = document.getElementById(`toggle-${key}`);
+      const dot = toggle.querySelector('div');
+      
+      if (state.settings[key]) {
+        toggle.className = "w-10 h-5 rounded-full p-0.5 transition-all bg-pink-500";
+        dot.className = "w-4 h-4 rounded-full bg-white transition-all transform translate-x-5";
+      } else {
+        toggle.className = "w-10 h-5 rounded-full p-0.5 transition-all bg-white/10";
+        dot.className = "w-4 h-4 rounded-full bg-white transition-all transform translate-x-0";
+      }
+    }
+
+    function setFontSize(size) {
+      triggerHaptic();
+      state.settings.fontSize = size;
+      saveState('settings', state.settings);
+      syncSettingsUI();
+    }
+
+    function applyFontSize() {
+      const txt = document.getElementById('card-question-text');
+      txt.className = "font-medium tracking-tight leading-relaxed text-center w-full";
+      
+      switch (state.settings.fontSize) {
+        case 'sm': txt.classList.add('text-lg', 'md:text-xl'); break;
+        case 'md': txt.classList.add('text-xl', 'md:text-2xl'); break;
+        case 'lg': txt.classList.add('text-2xl', 'md:text-3xl'); break;
+        case 'xl': txt.classList.add('text-3xl', 'md:text-4xl'); break;
+      }
+    }
+
+    // Toggle Specific Settings
+    function toggleSetting(key) {
+      triggerHaptic();
+      state.settings[key] = !state.settings[key];
+      saveState('settings', state.settings);
+      syncSettingsUI();
+      applyThemeSettings();
+    }
+
+    function applyThemeSettings() {
+      const body = document.body;
+      const themeIcon = document.getElementById('theme-icon');
+      
+      if (state.settings.darkMode) {
+        body.className = "h-[100dvh] w-screen relative flex flex-col justify-between overflow-hidden select-none transition-colors duration-500 bg-slate-950 text-white safe-pt safe-pb";
+        themeIcon.setAttribute('data-lucide', 'sun');
+        themeIcon.className.baseVal = "w-4 h-4 text-amber-400";
+      } else {
+        body.className = "h-[100dvh] w-screen relative flex flex-col justify-between overflow-hidden select-none transition-colors duration-500 bg-rose-50 text-slate-900 safe-pt safe-pb";
+        themeIcon.setAttribute('data-lucide', 'moon');
+        themeIcon.className.baseVal = "w-4 h-4 text-indigo-700";
+      }
+      lucide.createIcons();
+    }
+
+    function toggleTheme() {
+      toggleSetting('darkMode');
+    }
+
+    // Reset Data Trigger
+    function confirmResetAll() {
+      triggerHaptic();
+      if (confirm("Are you absolutely sure you want to clear all your saved settings and favourites?")) {
+        localStorage.clear();
+        state = {
+          names: { p1: '', p2: '' },
+          relationship: { status: 'Dating', anniversary: '' },
+          settings: { haptics: true, animations: true, darkMode: true, fontSize: 'lg' },
+          favorites: [],
+          currentScreen: 'onboarding',
+          currentCategory: null,
+          currentQuestion: null,
+          deckHistory: [],
+          deckHistoryIndex: -1
+        };
+        initUI();
+        showToast('All data successfully cleared');
+      }
+    }
+
+    // --- VISUAL AMBIENT PARTICLE ENGINE ---
+    function initFloatingHearts() {
+      const container = document.getElementById('heart-container');
+      
+      setInterval(() => {
+        if (!state.settings.animations) return;
+        
+        const heart = document.createElement('div');
+        heart.className = 'heart-particle';
+        heart.textContent = '♥';
+        
+        const xPos = Math.random() * 100;
+        const size = Math.random() * 15 + 10;
+        const duration = Math.random() * 6 + 4;
+        const delay = Math.random() * 2;
+        
+        heart.style.left = `${xPos}%`;
+        heart.style.fontSize = `${size}px`;
+        heart.style.animation = `floatUp ${duration}s linear infinite`;
+        heart.style.animationDelay = `${delay}s`;
+        
+        container.appendChild(heart);
+        
+        // Cleanup old hearts
+        setTimeout(() => {
+          heart.remove();
+        }, (duration + delay) * 1000);
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
+
+```
